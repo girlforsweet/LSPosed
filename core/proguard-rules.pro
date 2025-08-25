@@ -37,7 +37,7 @@
 
 -repackageclasses
 -allowaccessmodification
--overloadaggressively
 -dontwarn android.**
 -dontwarn de.robv.android.xposed.**
+-dontwarn io.github.libxposed.**
 -dontwarn org.lsposed.lspd.**
