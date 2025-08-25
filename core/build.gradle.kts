@@ -1,4 +1,5 @@
-import org.gradle.api.provider.Provider
+val verName: String by rootProject.extra
+val verCode: Int by rootProject.extra
 
 plugins {
     alias(libs.plugins.agp.lib)
@@ -15,33 +16,27 @@ android {
     defaultConfig {
         consumerProguardFiles("proguard-rules.pro")
 
-        val verName: String by rootProject.extra
-        val verCode: Int by rootProject.extra
-        buildConfigField("String", "FRAMEWORK_NAME", "\"${rootProject.name}\"")
-        buildConfigField("String", "VERSION_NAME", "\"$verName\"")
-        buildConfigField("long", "VERSION_CODE", "$verCode")
+        buildConfigField("String", "FRAMEWORK_NAME", """"${rootProject.name}"""")
+        buildConfigField("String", "VERSION_NAME", """"$verName"""")
+        buildConfigField("long", "VERSION_CODE", """$verCode""")
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = false
+            proguardFiles("proguard-rules.pro")
         }
     }
 }
 
-val verName: String by rootProject.extra
-val verCode: Int by rootProject.extra
-val rootDir: Provider<String> = layout.projectDirectory.asFile.map { it.absolutePath }
-tasks.register("copyTemplate") {
-    dependsOn("preBuild")
-    doLast {
-        copy {
-            from("src/main/jni/template/") {
-                expand("VERSION_CODE" to "$verCode", "VERSION_NAME" to verName)
-            }
-            into("src/main/jni/src/")
-        }
+tasks.register<Copy>("copyJniTemplates") {
+    inputs.property("verCode", verCode)
+    inputs.property("verName", verName)
+    from("src/main/jni/template/") {
+        expand("VERSION_CODE" to verCode, "VERSION_NAME" to verName)
     }
+    into("src/main/jni/src/")
 }
 
 dependencies {
